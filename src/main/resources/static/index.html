@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Life</title>
+    <script src="jquery-3.7.1.min.js"></script>
+    <style>
+        td {
+            width:25px;
+            height:25px;
+        }
+        .DEAD{
+            background-color:red;
+        }
+        .ALIVE{
+            background-color:green;
+        }
+    </style>
+</head>
+<body>
+    <span>Iteration: </span><span id="iteration"></span>
+    <table id="board"></table>
+    <button id="tick">Tick</button>
+    <br>
+    <button id="randomize">Randomize</button>
+    <br>
+    <button id="jump">Jump to: </button><input type="text" id="target">
+    <script>
+        function update(state) {
+            $("#iteration").html(state.iteration);
+            $("#board").empty();
+            $.each(state.board, function(index1, row) {
+                let rowHtml = "<tr id='row" + index1 + "'></tr>";
+                $("#board").append(rowHtml);
+
+                $.each(state.board[index1], function(index2, cell) {
+                    let cellHtml = "<td class='" + cell + "' data-row='" + index1 + "' data-cell='" + index2 + "'></td>";
+                    $("#row" + index1).append(cellHtml);
+                });
+            });
+
+            $("td").click(function(event) {
+                $.ajax({
+                    url: "/life/flip",
+                    data: {
+                        row: "" + $(event.target).data("row"),
+                        cell: "" + $(event.target).data("cell")
+                    },
+                    success: function(state){
+                        update(state);
+                    },
+                    error: function(result){
+                        $("#table").html(result);
+                    }
+                });
+            });
+        }
+
+        $(function() {
+            $.ajax({
+                url: "/life/state",
+                success: function(state){
+                    update(state);
+                },
+                error: function(result){
+                    $("#table").html(result);
+                }
+            });
+
+            $("#tick").click(function() {
+                $.ajax({
+                    url: "/life/tick",
+                    success: function(state){
+                        update(state);
+                    },
+                    error: function(result){
+                        $("#table").html(result);
+                    }
+                });
+            });
+
+            $("#randomize").click(function() {
+                $.ajax({
+                    url: "/life/randomize",
+                    success: function(state){
+                        update(state);
+                    },
+                    error: function(result){
+                        $("#table").html(result);
+                    }
+                });
+            });
+
+            $("#jump").click(function() {
+                $.ajax({
+                    url: "/life/jump",
+                    data: {
+                        target: $("#target").val()
+                    },
+                    success: function(state){
+                        update(state);
+                    },
+                    error: function(result){
+                        $("#table").html(result);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
